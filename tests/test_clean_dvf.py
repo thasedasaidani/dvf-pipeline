@@ -77,3 +77,10 @@ def test_ligne_sans_commune_exclue(spark):
     l = list(ligne("A", 200000, "Appartement", 50))
     l[6] = None  # nom_commune manquant
     assert nettoyer(spark, [tuple(l)]).count() == 0
+
+
+def test_valeurs_illisibles_ne_font_pas_planter(spark):
+    l = list(ligne("A", 200000, "Appartement", 50))
+    l[3] = "pas-un-prix"
+    lignes = [tuple(l), ligne("B", 200000, "Appartement", 50)]
+    assert [r["id_mutation"] for r in nettoyer(spark, lignes).collect()] == ["B"]

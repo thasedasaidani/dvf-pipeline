@@ -1,5 +1,9 @@
-requests==2.32.3
-python-dotenv==1.0.1
-pytest==8.3.3
-urllib3<2  # Python 3.9 de macOS utilise LibreSSL
-pyspark==3.5.3
+# Pipeline (ingestion, Spark, chargement)
+requests==2.34.2
+python-dotenv==1.2.4
+pyspark==4.3.0
+# API
+flask==3.1.3
+psycopg[binary]==3.3.8
+# Tests
+pytest==9.2.0

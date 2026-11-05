@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import sys
 import time
 
 from dotenv import load_dotenv
@@ -34,6 +35,8 @@ PRIX_M2_MIN, PRIX_M2_MAX = 500, 25_000      # €/m² : au-delà, erreurs de sai
 
 
 def get_spark(app_name: str = "dvf-pipeline", extra_conf: dict | None = None) -> SparkSession:
+    # les workers Spark doivent utiliser le même Python que ce programme (celui du .venv)
+    os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
     builder = (
         SparkSession.builder.appName(app_name)
         .master(os.getenv("SPARK_MASTER", "local[*]"))
@@ -52,20 +55,24 @@ def read_raw(spark: SparkSession, path: str) -> DataFrame:
 
 
 def cast_columns(df: DataFrame) -> DataFrame:
-    """Garde les colonnes utiles et leur donne le bon type."""
+    """Garde les colonnes utiles et leur donne le bon type.
+
+    try_cast / try_to_date : une valeur illisible devient NULL au lieu de faire échouer
+    le job (Spark 4 est en mode ANSI strict par défaut). Ces lignes sont ensuite écartées.
+    """
     return df.select(
         F.col("id_mutation"),
-        F.to_date("date_mutation").alias("date_mutation"),
+        F.try_to_date("date_mutation").alias("date_mutation"),
         F.col("nature_mutation"),
-        F.col("valeur_fonciere").cast("double"),
+        F.col("valeur_fonciere").try_cast("double"),
         F.col("code_departement"),
         F.col("code_commune"),
         F.col("nom_commune"),
         F.col("type_local"),
-        F.col("surface_reelle_bati").cast("double"),
-        F.col("nombre_pieces_principales").cast("int"),
-        F.col("longitude").cast("double"),
-        F.col("latitude").cast("double"),
+        F.col("surface_reelle_bati").try_cast("double"),
+        F.col("nombre_pieces_principales").try_cast("int"),
+        F.col("longitude").try_cast("double"),
+        F.col("latitude").try_cast("double"),
     ).withColumn("annee", F.year("date_mutation"))
 
 

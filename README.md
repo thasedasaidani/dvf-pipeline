@@ -8,12 +8,14 @@ ingestion → PySpark → PostgreSQL → Airflow → API Flask → docker-compos
 - [x] Étape 2 — Nettoyage et agrégats PySpark (prix au m²)
 - [x] Étape 3 — Chargement PostgreSQL
 - [x] Étape 4 — DAG Airflow
-- [ ] Étape 5 — API Flask
+- [x] Étape 5 — API Flask
 - [ ] Étape 6 — docker-compose
 
 ## Démarrage
+Prérequis : Python 3.12, Java 17+, Docker Desktop.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 python -m src.ingestion.download_dvf --dept 91 --years 2   # petit jeu pour développer
@@ -65,6 +67,25 @@ Architecture Docker :
 - `postgres` : base métier (tables DVF)
 - `airflow-db` : base interne d'Airflow, séparée des données
 - `airflow` : Airflow 3 (`standalone`) + Java + PySpark, le projet est monté dans `/opt/project`
+
+## API (étape 5)
+API Flask servie par gunicorn dans le conteneur `api` (http://localhost:8000).
+
+| Endpoint | Description |
+|---|---|
+| `GET /prix?commune=Juvisy-sur-Orge` | prix au m² médian/moyen et nb de ventes, par année et type |
+| `GET /prix?commune=...&type=Appartement&annee=2025` | idem, filtré |
+| `GET /departements/91` | chiffres du département |
+| `GET /communes?q=juv` | recherche de communes (autocomplétion) |
+| `GET /health` | état de l'API et de la base |
+
+Erreurs en JSON : 400 (paramètre manquant ou invalide), 404 (aucune donnée), 503 (base
+indisponible). Requêtes SQL paramétrées (pas d'injection), tests avec un faux dépôt
+de données (`tests/test_api.py`).
+
+```bash
+curl "http://localhost:8000/prix?commune=Juvisy-sur-Orge&type=Appartement"
+```
 
 ## Données
 Source : DGFiP, DVF géolocalisées par Etalab — Licence Ouverte 2.0.

@@ -1,3 +1,3 @@
 # Dépendances du projet dans l'image Airflow (requests est déjà fourni par Airflow)
-pyspark==3.5.3
-python-dotenv==1.0.1
+pyspark==4.3.0
+python-dotenv==1.2.4

@@ -1,0 +1,7 @@
+# Ce qui n'a rien à faire dans les images Docker (contexte de build plus léger)
+.venv/
+data/
+.git/
+.pytest_cache/
+**/__pycache__/
+.env
