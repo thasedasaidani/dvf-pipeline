@@ -11,8 +11,11 @@ def ligne(id_mut, prix, type_local, surface, nature="Vente", commune="91326"):
             type_local, None if surface is None else str(surface), "3", "2.37", "48.69")
 
 
+SCHEMA = ", ".join(f"{c} string" for c in COLS)  # comme le CSV brut : tout en texte
+
+
 def nettoyer(spark, lignes):
-    df = spark.createDataFrame(lignes, COLS)
+    df = spark.createDataFrame(lignes, SCHEMA)
     return clean(cast_columns(df))
 
 
@@ -68,3 +71,9 @@ def test_agregat_mediane_par_commune(spark):
     assert len(agg) == 1
     assert agg[0]["nb_ventes"] == 3
     assert agg[0]["prix_m2_median"] == 4000.0
+
+
+def test_ligne_sans_commune_exclue(spark):
+    l = list(ligne("A", 200000, "Appartement", 50))
+    l[6] = None  # nom_commune manquant
+    assert nettoyer(spark, [tuple(l)]).count() == 0

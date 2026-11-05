@@ -33,15 +33,17 @@ SURFACE_MIN, SURFACE_MAX = 9, 1000          # m² : en dessous de 9 m², ce n'es
 PRIX_M2_MIN, PRIX_M2_MAX = 500, 25_000      # €/m² : au-delà, erreurs de saisie ou ventes atypiques
 
 
-def get_spark(app_name: str = "dvf-pipeline") -> SparkSession:
-    return (
+def get_spark(app_name: str = "dvf-pipeline", extra_conf: dict | None = None) -> SparkSession:
+    builder = (
         SparkSession.builder.appName(app_name)
         .master(os.getenv("SPARK_MASTER", "local[*]"))
         .config("spark.driver.memory", os.getenv("SPARK_DRIVER_MEMORY", "4g"))
         .config("spark.sql.session.timeZone", "UTC")
         .config("spark.ui.showConsoleProgress", "false")
-        .getOrCreate()
     )
+    for key, value in (extra_conf or {}).items():
+        builder = builder.config(key, value)
+    return builder.getOrCreate()
 
 
 def read_raw(spark: SparkSession, path: str) -> DataFrame:
@@ -80,6 +82,8 @@ def clean(df: DataFrame) -> DataFrame:
         df.dropDuplicates()
         .filter(F.col("nature_mutation") == "Vente")
         .filter(F.col("valeur_fonciere") > 0)
+        # colonnes obligatoires pour l'analyse (et NOT NULL dans PostgreSQL)
+        .dropna(subset=["date_mutation", "code_commune", "nom_commune", "code_departement"])
     )
 
     # Nombre de locaux "principaux" (hors dépendances) par vente
