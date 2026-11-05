@@ -7,7 +7,7 @@ ingestion → PySpark → PostgreSQL → Airflow → API Flask → docker-compos
 - [x] Étape 1 — Ingestion des fichiers DVF (5 dernières années)
 - [x] Étape 2 — Nettoyage et agrégats PySpark (prix au m²)
 - [x] Étape 3 — Chargement PostgreSQL
-- [ ] Étape 4 — DAG Airflow
+- [x] Étape 4 — DAG Airflow
 - [ ] Étape 5 — API Flask
 - [ ] Étape 6 — docker-compose
 
@@ -50,6 +50,21 @@ Exemple :
 docker compose exec postgres psql -U dvf -d dvf \
   -c "SELECT * FROM prix_m2_commune WHERE LOWER(nom_commune) = 'juvisy-sur-orge';"
 ```
+
+## Orchestration Airflow (étape 4)
+Le DAG `dvf_pipeline` (`dags/dvf_pipeline.py`) enchaîne **telecharger → nettoyer → charger**,
+avec 2 relances automatiques par tâche, une exécution mensuelle et des paramètres
+(`dept`, `years`) modifiables au lancement.
+
+```bash
+docker compose up -d --build      # PostgreSQL + Airflow (premier build : ~5 min)
+```
+Interface : http://localhost:8080 → DAG `dvf_pipeline` → *Trigger*.
+
+Architecture Docker :
+- `postgres` : base métier (tables DVF)
+- `airflow-db` : base interne d'Airflow, séparée des données
+- `airflow` : Airflow 3 (`standalone`) + Java + PySpark, le projet est monté dans `/opt/project`
 
 ## Données
 Source : DGFiP, DVF géolocalisées par Etalab — Licence Ouverte 2.0.

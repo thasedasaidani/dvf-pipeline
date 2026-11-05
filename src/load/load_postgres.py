@@ -78,6 +78,9 @@ def load_table(spark, parquet_path: str, table: str, url: str, props: dict) -> i
         .first()["n"]
     )
     log.info("Table %-20s : %s lignes", table, f"{nb:,}".replace(",", " "))
+    if nb == 0:
+        # contrôle qualité : une table vide fait échouer la tâche (visible dans Airflow)
+        raise ValueError(f"La table {table} est vide après chargement")
     return nb
 
 
