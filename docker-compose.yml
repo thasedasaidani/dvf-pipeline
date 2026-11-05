@@ -50,6 +50,8 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
       AIRFLOW__CORE__DAGS_FOLDER: /opt/project/dags
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      # le DAG est actif dès le premier démarrage
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
       # usage local uniquement : pas d'écran de connexion
       AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "True"
       # dans le réseau Docker, la base métier s'appelle "postgres" et écoute sur 5432
@@ -58,7 +60,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      SPARK_DRIVER_MEMORY: 2g
+      # France entière : prévoir 8 Go de mémoire dans Docker Desktop
+      SPARK_DRIVER_MEMORY: ${AIRFLOW_SPARK_MEMORY:-3g}
       DVF_PROJECT_DIR: /opt/project
     volumes:
       - .:/opt/project
