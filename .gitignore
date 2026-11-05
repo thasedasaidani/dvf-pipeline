@@ -6,3 +6,7 @@ data/raw/*
 !data/raw/.gitkeep
 *.part
 .pytest_cache/
+data/processed/
+spark-warehouse/
+metastore_db/
+derby.log
