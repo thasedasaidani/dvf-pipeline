@@ -12,6 +12,9 @@ nettoyage et calcul du prix au m² avec **PySpark**, stockage dans **PostgreSQL*
 orchestration avec **Airflow**, exposition via une **API Flask**, le tout lancé avec
 **Docker Compose**.
 
+> **20,5 millions de lignes** (France entière, 5 ans) → **4,26 millions de ventes** nettoyées,
+> traitées en **~11 minutes** sur un ordinateur portable.
+
 ```bash
 curl "http://localhost:8000/prix?commune=Juvisy-sur-Orge&type=Appartement&annee=2025"
 ```
@@ -68,9 +71,11 @@ Puis http://localhost:8000/prix?commune=Juvisy-sur-Orge. `make help` liste toute
 | Périmètre | Lignes DVF brutes | Ventes retenues | Durée du DAG |
 |---|---|---|---|
 | Essonne (91), 2024–2025 | — | 24 546 | 1 min 46 (dont 1 min 07 de Spark) |
-| France entière, 5 ans | _à compléter_ | _à compléter_ | _à compléter_ |
+| **France entière, 2021–2025** | **20 468 762** | **4 257 597** | **~11 min** |
 
-Exécution sur un MacBook, Spark en mode local dans le conteneur Airflow.
+Exécution sur un MacBook, Spark en mode local dans le conteneur Airflow (3 Go de mémoire) :
+**20,5 millions de lignes DVF traitées de bout en bout en ~11 minutes**, du téléchargement
+jusqu'au chargement dans PostgreSQL.
 
 ## Étapes du pipeline
 
