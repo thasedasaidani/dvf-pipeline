@@ -1,5 +1,5 @@
-requests==2.32.3
-python-dotenv==1.0.1
-pytest==8.3.3
+requests==2.33.0
+python-dotenv==1.2.2
+pytest==9.0.3
 urllib3<2  # Python 3.9 de macOS utilise LibreSSL
-pyspark==3.5.3
+pyspark==3.5.8
