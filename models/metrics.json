@@ -1,0 +1,38 @@
+{
+  "infos": {
+    "annees_train": [
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "annee_test": 2025,
+    "n_train": 1000000,
+    "n_test": 250000,
+    "duree_s": 38.5,
+    "meilleur_modele": "boosting"
+  },
+  "resultats": {
+    "reference": {
+      "erreur_mediane_pct": 20.1,
+      "erreur_moyenne_pct": 30.7,
+      "erreur_absolue_mediane_eur": 37432,
+      "part_a_moins_de_10pct": 26.8,
+      "part_a_moins_de_20pct": 49.7
+    },
+    "lineaire": {
+      "erreur_mediane_pct": 19.7,
+      "erreur_moyenne_pct": 29.4,
+      "erreur_absolue_mediane_eur": 36640,
+      "part_a_moins_de_10pct": 27.0,
+      "part_a_moins_de_20pct": 50.6
+    },
+    "boosting": {
+      "erreur_mediane_pct": 18.7,
+      "erreur_moyenne_pct": 28.1,
+      "erreur_absolue_mediane_eur": 34685,
+      "part_a_moins_de_10pct": 28.5,
+      "part_a_moins_de_20pct": 52.9
+    }
+  }
+}

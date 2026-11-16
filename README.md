@@ -5,6 +5,7 @@
 ![Spark](https://img.shields.io/badge/Spark-4.3-orange)
 ![Airflow](https://img.shields.io/badge/Airflow-3.3-017CEE)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9-F7931E)
 
 Pipeline data de bout en bout sur les **Demandes de Valeurs Foncières** (DVF), le registre
 public de toutes les ventes immobilières en France : ingestion depuis data.gouv.fr,
@@ -125,6 +126,30 @@ Erreurs en JSON : 400 (paramètre invalide), 404 (aucune donnée), 503 (base ind
 Requêtes SQL paramétrées. Le nombre de ventes accompagne toujours le prix : une médiane
 calculée sur 40 ventes est moins fiable que sur 400.
 
+### 6. Version Data Science — `src/ml/` (scikit-learn)
+Prédire le **prix de vente** d'un logement à partir des ventes nettoyées, en comparant
+trois modèles :
+
+| Modèle | Idée |
+|---|---|
+| Référence | prix médian au m² de la commune × surface (ce que ferait un humain) |
+| Régression linéaire (Ridge) | relation linéaire entre les variables et le log du prix |
+| Gradient boosting | arbres de décision successifs, capte les effets non linéaires |
+
+- **Découpage temporel** : entraînement sur les années passées, test sur la dernière année,
+  comme dans la réalité (un découpage aléatoire serait trop optimiste).
+- **Pas de fuite de données** : les prix médians par commune utilisés comme variables sont
+  calculés uniquement sur les ventes d'entraînement (vérifié par un test).
+- **Métrique** : erreur en % du vrai prix (médiane et moyenne), part des ventes estimées à
+  ±10 % et ±20 %.
+
+Résultats détaillés et graphique : [`reports/ml_resultats.md`](reports/ml_resultats.md).
+
+```bash
+make ml                                              # entraîne et compare (~quelques minutes)
+make estimer COMMUNE=Juvisy-sur-Orge SURFACE=60      # estimation d'un bien
+```
+
 ## Qualité
 
 - **Tests** (`pytest`) : règles de nettoyage Spark, téléchargement, configuration JDBC,
@@ -153,6 +178,8 @@ src/ingestion/        téléchargement DVF
 src/transform/        nettoyage et agrégats PySpark
 src/load/             chargement PostgreSQL (JDBC)
 src/api/              API Flask
+src/ml/               modèles de prédiction du prix (Data Science)
+reports/              résultats des modèles
 sql/init.sql          schéma de la base
 docker/               Dockerfiles Airflow et API
 tests/                tests pytest

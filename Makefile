@@ -1,5 +1,5 @@
 # Raccourcis du projet. Usage : make <commande>
-.PHONY: help install test up down logs run run-france psql
+.PHONY: help install test up down logs run run-france psql ml estimer
 
 help:  ## Liste des commandes
 	@grep -E "^[a-z-]+:.*##" Makefile | awk -F ":.*## " '{printf "  make %-12s %s\n", $$1, $$2}'
@@ -29,3 +29,9 @@ run-france:  ## Déclenche le pipeline sur la France entière, 5 ans
 
 psql:  ## Ouvre une console SQL sur la base DVF
 	docker compose exec postgres psql -U $${POSTGRES_USER:-dvf} -d $${POSTGRES_DB:-dvf}
+
+ml:  ## Entraîne et compare les modèles de prix (version Data Science)
+	.venv/bin/python -m src.ml.train_model
+
+estimer:  ## Exemple d'estimation : make estimer COMMUNE=Juvisy-sur-Orge SURFACE=60
+	.venv/bin/python -m src.ml.predict --commune "$(or $(COMMUNE),Juvisy-sur-Orge)" --type $(or $(TYPE),Appartement) --surface $(or $(SURFACE),60) --pieces $(or $(PIECES),3)
